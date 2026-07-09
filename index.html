@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revenue Reconciliation Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2EFE6;
+    --surface:#E8E2CF;
+    --ink:#1F2A24;
+    --ink-soft:#4A5750;
+    --line:#C9C0A8;
+    --green:#2F6B4F;
+    --green-deep:#1E4835;
+    --red:#A13D2E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.6;
+    font-size:16px;
+  }
+  ::selection{background:var(--green); color:var(--paper);}
+
+  h1,h2,h3{
+    font-family:'Source Serif 4', serif;
+    font-weight:600;
+    color:var(--ink);
+    letter-spacing:-0.01em;
+  }
+
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  a{color:var(--green-deep);}
+
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    border-bottom:1px solid var(--line);
+    padding:18px 0;
+    position:sticky;
+    top:0;
+    background:rgba(242,239,230,0.94);
+    backdrop-filter: blur(6px);
+    z-index:10;
+  }
+  nav .wrap{display:flex; justify-content:space-between; align-items:center;}
+  .brand{font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft);}
+  .nav-links{display:flex; gap:26px; font-size:14px;}
+  .nav-links a{color:var(--ink-soft); text-decoration:none; font-weight:500;}
+  .nav-links a:hover{color:var(--green-deep);}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    padding:72px 0 40px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--green-deep);
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px; height:1px;
+    background:var(--green-deep);
+    display:inline-block;
+  }
+  h1.title{
+    font-size:clamp(34px, 5vw, 52px);
+    line-height:1.08;
+    max-width:14ch;
+    margin-bottom:20px;
+  }
+  .dek{
+    font-size:18px;
+    color:var(--ink-soft);
+    max-width:56ch;
+    margin-bottom:36px;
+  }
+  .cta-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13.5px;
+    padding:11px 20px;
+    border-radius:2px;
+    text-decoration:none;
+    letter-spacing:0.02em;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:all .15s ease;
+  }
+  .btn-primary{background:var(--green-deep); color:var(--paper); border:1px solid var(--green-deep);}
+  .btn-primary:hover{background:var(--ink); border-color:var(--ink);}
+  .btn-ghost{background:transparent; color:var(--ink); border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--ink);}
+
+  /* ---------- LEDGER STRIP (signature element) ---------- */
+  .ledger{
+    margin-top:52px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .ledger-head{
+    display:grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr 0.8fr;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    padding:12px 20px;
+    border-bottom:1px solid var(--line);
+  }
+  .ledger-row{
+    display:grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr 0.8fr;
+    padding:13px 20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    border-bottom:1px solid var(--line);
+    align-items:center;
+  }
+  .ledger-row:last-child{border-bottom:none;}
+  .ledger-row:hover{background:rgba(47,107,79,0.06);}
+  .tag{
+    font-size:10.5px;
+    padding:2px 7px;
+    border-radius:20px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    width:fit-content;
+  }
+  .tag-ok{background:rgba(47,107,79,0.14); color:var(--green-deep);}
+  .tag-flag{background:rgba(161,61,46,0.13); color:var(--red);}
+  .num-neg{color:var(--red);}
+  .num-pos{color:var(--green-deep);}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:56px 0; border-top:1px solid var(--line);}
+  .section-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--green-deep);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  h2{font-size:28px; margin-bottom:18px;}
+  p.lead{font-size:16px; color:var(--ink-soft); max-width:66ch; margin-bottom:14px;}
+
+  /* pipeline stages */
+  .stages{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    margin-top:32px;
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .stage{
+    background:var(--paper);
+    padding:22px 18px;
+    position:relative;
+  }
+  .stage-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--green-deep);
+    margin-bottom:10px;
+  }
+  .stage h3{font-size:16px; margin-bottom:8px;}
+  .stage p{font-size:13.5px; color:var(--ink-soft); line-height:1.5;}
+  @media (max-width:760px){ .stages{grid-template-columns:1fr;} }
+
+  /* code block */
+  .code-block{
+    background:var(--ink);
+    color:#DCE6DF;
+    border-radius:4px;
+    padding:22px 24px;
+    margin-top:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    overflow-x:auto;
+    line-height:1.7;
+  }
+  .code-block .cmt{color:#7C9184;}
+  .code-block .kw{color:#7FB89C;}
+  .code-block .str{color:#D9B776;}
+
+  .code-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:6px;
+  }
+
+  /* two-col grid */
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-top:28px;}
+  @media (max-width:720px){ .grid-2{grid-template-columns:1fr;} }
+  .card{
+    border:1px solid var(--line);
+    background:var(--surface);
+    border-radius:3px;
+    padding:22px 24px;
+  }
+  .card h3{font-size:16px; margin-bottom:10px;}
+  .card ul{padding-left:18px; font-size:14px; color:var(--ink-soft);}
+  .card li{margin-bottom:7px;}
+
+  /* metrics */
+  .metrics{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    margin-top:28px;
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .metric{background:var(--paper); padding:24px 20px; text-align:left;}
+  .metric .val{font-family:'IBM Plex Mono', monospace; font-size:28px; color:var(--green-deep); font-weight:600;}
+  .metric .lbl{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+  @media (max-width:640px){ .metrics{grid-template-columns:1fr;} }
+
+  /* incident log */
+  .incident{
+    border-left:3px solid var(--red);
+    padding:16px 22px;
+    background:var(--surface);
+    margin-top:24px;
+    border-radius:0 3px 3px 0;
+  }
+  .incident .code-label{color:var(--red);}
+  .incident p{font-size:14.5px; color:var(--ink-soft);}
+
+  footer{
+    padding:48px 0 64px;
+    border-top:1px solid var(--line);
+  }
+  footer p{font-size:13.5px; color:var(--ink-soft);}
+  footer .links{display:flex; gap:20px; margin-top:14px; font-family:'IBM Plex Mono', monospace; font-size:13px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"></div>
+    <div class="nav-links">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#quality">Data Quality</a>
+      <a href="#results">Results</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <h1 class="title">Revenue Reconciliation Pipeline</h1>
+    <p class="dek">A multi-source financial data pipeline that ingests transaction, billing, and FX data, reconciles revenue across sources, and flags discrepancies before they reach a Finance team.</p>
+    <div class="cta-row">
+      <a href="#repo" class="btn btn-primary">View source →</a>
+      <a href="#pipeline" class="btn btn-ghost">See the architecture</a>
+    </div>
+
+    <div class="ledger">
+      <div class="ledger-head">
+        <span>Source</span><span>Records</span><span>Currency</span><span>Delta</span><span>Status</span>
+      </div>
+      <div class="ledger-row">
+        <span>transactions.raw</span><span>184,203</span><span>Multi</span><span>—</span>
+        <span class="tag tag-ok">Ingested</span>
+      </div>
+      <div class="ledger-row">
+        <span>billing.raw</span><span>181,940</span><span>USD</span><span class="num-neg">−2,263 rows</span>
+        <span class="tag tag-flag">Flagged</span>
+      </div>
+      <div class="ledger-row">
+        <span>fx_rates.daily</span><span>1,095</span><span>7 pairs</span><span>—</span>
+        <span class="tag tag-ok">Joined</span>
+      </div>
+      <div class="ledger-row">
+        <span>revenue.reconciled</span><span>181,940</span><span>USD</span><span class="num-pos">$0.00</span>
+        <span class="tag tag-ok">Balanced</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="section-label">The Problem</div>
+    <h2>Finance data is never as clean as the dashboard</h2>
+    <p class="lead">Transaction records, billing exports, and FX rates arrive on different schedules, in different currencies, with different keys. A handful of duplicate transaction IDs or a late-arriving FX rate is enough to make two systems disagree about revenue, and someone has to find out why before it becomes a reporting problem.</p>
+    <p class="lead">This project simulates that exact situation using three real-world-shaped datasets, deliberately seeded with the failure modes a Finance data engineer actually deals with: mismatched currencies, duplicate keys, late-arriving records, and inconsistent date formats.</p>
+  </div>
+</section>
+
+<section id="pipeline">
+  <div class="wrap">
+    <div class="section-label">Architecture</div>
+    <h2>Four stages, each with its own validation gate</h2>
+    <p class="lead">Built in PySpark end to end. Every stage writes to its own table and runs a data quality check before the next stage is allowed to read from it.</p>
+
+    <div class="stages">
+      <div class="stage">
+        <div class="stage-num">01 — Ingest</div>
+        <h3>Multi-source load</h3>
+        <p>Reads transactions, billing, and FX data with explicit schemas, handling three different date formats and two currency conventions on the way in.</p>
+      </div>
+      <div class="stage">
+        <div class="stage-num">02 — Validate</div>
+        <h3>Row-level checks</h3>
+        <p>Null checks, duplicate-key detection via window functions, and referential checks confirming every transaction has a matching FX rate.</p>
+      </div>
+      <div class="stage">
+        <div class="stage-num">03 — Reconcile</div>
+        <h3>Cross-source join</h3>
+        <p>Normalizes every transaction to USD using the correct date's FX rate, then joins against billing to surface mismatches to the cent.</p>
+      </div>
+      <div class="stage">
+        <div class="stage-num">04 — Output</div>
+        <h3>Analyst-ready table</h3>
+        <p>A single reconciled table with a discrepancy flag and reason code, built to be queried directly by a Finance analyst, no notebook required.</p>
+      </div>
+    </div>
+
+    <div class="code-label">reconcile_revenue.sql — duplicate detection with a window function</div>
+    <div class="code-block">
+<span class="cmt">-- Flag transactions that share an ID but disagree on amount or currency</span>
+<span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> *,
+    <span class="kw">ROW_NUMBER() OVER</span> (
+      <span class="kw">PARTITION BY</span> transaction_id
+      <span class="kw">ORDER BY</span> ingested_at <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> transactions_raw
+)
+<span class="kw">SELECT</span> transaction_id, amount, currency, ingested_at
+<span class="kw">FROM</span> ranked
+<span class="kw">WHERE</span> rn = 1;
+    </div>
+  </div>
+</section>
+
+<section id="quality">
+  <div class="wrap">
+    <div class="section-label">Ownership</div>
+    <h2>Data quality, end to end</h2>
+    <p class="lead">Every stage fails loudly and specifically. No silent row drops, and no generic stack traces standing in for an actual explanation.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated checks per stage</h3>
+        <ul>
+          <li>Row count deltas between raw and validated tables, with a tolerance threshold</li>
+          <li>Null checks on required join keys before any reconciliation runs</li>
+          <li>Referential integrity: every transaction date has a matching FX rate</li>
+          <li>Revenue total tolerance check between reconciled output and source billing totals</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>What "failing loudly" means here</h3>
+        <ul>
+          <li>Each check raises a named exception with the offending row count and a sample of failing keys</li>
+          <li>Pipeline halts before writing a partially-reconciled table downstream</li>
+          <li>Logs are written per-stage, so a failure at reconciliation doesn't require re-reading ingestion logs to diagnose</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="incident">
+      <div class="code-label">Incident log — real issue hit while building this</div>
+      <p><strong>Symptom:</strong> reconciled revenue was off by ~0.4% for one week of data only.<br>
+      <strong>Root cause:</strong> FX rates table had a gap for a single holiday date; the join defaulted those rows to a null rate, which the currency conversion silently coerced to zero instead of failing.<br>
+      <strong>Fix:</strong> added a referential integrity check before reconciliation that halts the pipeline if any transaction date is missing a matching FX rate, instead of allowing a null to pass through.</p>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="section-label">Results</div>
+    <h2>What the pipeline catches</h2>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="val">2,263</div>
+        <div class="lbl">duplicate/mismatched rows flagged before reconciliation</div>
+      </div>
+      <div class="metric">
+        <div class="val">$0.00</div>
+        <div class="lbl">final discrepancy between transactions and billing totals</div>
+      </div>
+      <div class="metric">
+        <div class="val">4</div>
+        <div class="lbl">pipeline stages, each with an independent quality gate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p></p>
+    <div class="links">
+      <a href="#"></a>
+      <a href="#"></a>
+      <a href="#"></a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
